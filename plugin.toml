@@ -1,0 +1,11 @@
+[plugin]
+name = "fledge-plugin-deps"
+version = "0.1.0"
+description = "Dependency health for fledge — outdated, audit, licenses across multiple ecosystems"
+author = "0xLeif"
+license = "MIT"
+
+[[commands]]
+name = "deps"
+description = "Check dependency health (outdated, audit, licenses)"
+binary = "bin/fledge-deps"
