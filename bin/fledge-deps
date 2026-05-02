@@ -35,7 +35,7 @@ ECOSYSTEMS (auto-detected from lockfiles in cwd):
   rust    Cargo.lock          → cargo outdated / cargo audit
   node    package-lock.json   → npm outdated / npm audit
   node    pnpm-lock.yaml      → pnpm outdated / pnpm audit
-  node    bun.lockb           → bun outdated / bun audit
+  node    bun.lockb / bun.lock → bun outdated / bun audit
   python  poetry.lock         → poetry show --outdated / pip-audit
   python  uv.lock             → uv pip list --outdated / pip-audit
 EOF
@@ -60,7 +60,7 @@ fi
 
 detect_ecosystem() {
   if [ -f Cargo.lock ]; then echo "rust"; return; fi
-  if [ -f bun.lockb ]; then echo "node-bun"; return; fi
+  if [ -f bun.lockb ] || [ -f bun.lock ]; then echo "node-bun"; return; fi
   if [ -f pnpm-lock.yaml ]; then echo "node-pnpm"; return; fi
   if [ -f package-lock.json ]; then echo "node-npm"; return; fi
   if [ -f yarn.lock ]; then echo "node-yarn"; return; fi
@@ -72,7 +72,7 @@ detect_ecosystem() {
 ECO="$(detect_ecosystem)"
 
 if [ "$ECO" = "unknown" ]; then
-  echo "fledge-deps: could not detect ecosystem. Looked for Cargo.lock, package-lock.json, pnpm-lock.yaml, bun.lockb, yarn.lock, poetry.lock, uv.lock." >&2
+  echo "fledge-deps: could not detect ecosystem. Looked for Cargo.lock, package-lock.json, pnpm-lock.yaml, bun.lockb, bun.lock, yarn.lock, poetry.lock, uv.lock." >&2
   exit 65
 fi
 
