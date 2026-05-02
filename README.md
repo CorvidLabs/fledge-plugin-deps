@@ -23,8 +23,8 @@ Auto-detects the project ecosystem from lockfiles in the current directory, then
 | `pnpm-lock.yaml` | Node (pnpm) | `pnpm outdated` / `pnpm audit` |
 | `package-lock.json` | Node (npm) | `npm outdated` / `npm audit` |
 | `yarn.lock` | Node (Yarn) | `yarn outdated` / `yarn npm audit` |
-| `poetry.lock` | Python (Poetry) | `poetry show --outdated` |
-| `uv.lock` | Python (uv) | `uv pip list --outdated` |
+| `poetry.lock` | Python (Poetry) | `poetry show --outdated` / `pip-audit` |
+| `uv.lock` | Python (uv) | `uv pip list --outdated` / `pip-audit` |
 
 ```sh
 fledge deps --outdated

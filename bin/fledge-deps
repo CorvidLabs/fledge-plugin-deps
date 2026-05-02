@@ -36,8 +36,8 @@ ECOSYSTEMS (auto-detected from lockfiles in cwd):
   node    package-lock.json   → npm outdated / npm audit
   node    pnpm-lock.yaml      → pnpm outdated / pnpm audit
   node    bun.lockb           → bun outdated / bun audit
-  python  poetry.lock         → poetry show --outdated
-  python  uv.lock             → uv pip list --outdated
+  python  poetry.lock         → poetry show --outdated / pip-audit
+  python  uv.lock             → uv pip list --outdated / pip-audit
 EOF
       exit 0
       ;;
@@ -50,6 +50,12 @@ done
 
 if [ "$OUTDATED" = "false" ] && [ "$AUDIT" = "false" ] && [ "$LICENSES" = "false" ]; then
   OUTDATED=true
+fi
+
+# Fail fast for unimplemented flags before doing any real work.
+if [ "$LICENSES" = "true" ]; then
+  echo "fledge-deps: --licenses is not yet implemented in v0.1." >&2
+  exit 70
 fi
 
 detect_ecosystem() {
@@ -70,46 +76,61 @@ if [ "$ECO" = "unknown" ]; then
   exit 65
 fi
 
+run_ecosystem_commands() {
+  case "$ECO" in
+    rust)
+      if [ "$OUTDATED" = "true" ]; then
+        command -v cargo-outdated >/dev/null 2>&1 || { echo "fledge-deps: cargo-outdated not installed. Run: cargo install cargo-outdated" >&2; exit 127; }
+        cargo outdated
+      fi
+      if [ "$AUDIT" = "true" ]; then
+        command -v cargo-audit >/dev/null 2>&1 || { echo "fledge-deps: cargo-audit not installed. Run: cargo install cargo-audit" >&2; exit 127; }
+        cargo audit
+      fi
+      ;;
+    node-bun)
+      if [ "$OUTDATED" = "true" ]; then bun outdated; fi
+      if [ "$AUDIT" = "true" ]; then
+        if ! bun audit 2>/dev/null; then
+          command -v npm >/dev/null 2>&1 || { echo "fledge-deps: bun audit failed and npm is not installed as fallback." >&2; exit 127; }
+          npm audit
+        fi
+      fi
+      ;;
+    node-pnpm)
+      if [ "$OUTDATED" = "true" ]; then pnpm outdated; fi
+      if [ "$AUDIT" = "true" ]; then pnpm audit; fi
+      ;;
+    node-npm)
+      if [ "$OUTDATED" = "true" ]; then npm outdated; fi
+      if [ "$AUDIT" = "true" ]; then npm audit; fi
+      ;;
+    node-yarn)
+      if [ "$OUTDATED" = "true" ]; then yarn outdated; fi
+      if [ "$AUDIT" = "true" ]; then yarn npm audit; fi
+      ;;
+    python-poetry)
+      if [ "$OUTDATED" = "true" ]; then poetry show --outdated; fi
+      if [ "$AUDIT" = "true" ]; then
+        command -v pip-audit >/dev/null 2>&1 || { echo "fledge-deps: pip-audit not installed. Run: pipx install pip-audit" >&2; exit 127; }
+        pip-audit
+      fi
+      ;;
+    python-uv)
+      if [ "$OUTDATED" = "true" ]; then uv pip list --outdated; fi
+      if [ "$AUDIT" = "true" ]; then
+        command -v pip-audit >/dev/null 2>&1 || { echo "fledge-deps: pip-audit not installed. Run: pipx install pip-audit" >&2; exit 127; }
+        pip-audit
+      fi
+      ;;
+  esac
+}
+
 if [ "$JSON" = "true" ]; then
-  printf '{\n  "ecosystem": "%s",\n  "note": "fledge-plugin-deps v0.1 is a thin wrapper around ecosystem tools — JSON output forwards each tool'"'"'s native output unchanged."\n}\n' "$ECO"
-fi
-
-case "$ECO" in
-  rust)
-    if [ "$OUTDATED" = "true" ]; then
-      command -v cargo-outdated >/dev/null 2>&1 || { echo "fledge-deps: cargo-outdated not installed. Run: cargo install cargo-outdated" >&2; exit 127; }
-      cargo outdated
-    fi
-    if [ "$AUDIT" = "true" ]; then
-      command -v cargo-audit >/dev/null 2>&1 || { echo "fledge-deps: cargo-audit not installed. Run: cargo install cargo-audit" >&2; exit 127; }
-      cargo audit
-    fi
-    ;;
-  node-bun)
-    if [ "$OUTDATED" = "true" ]; then bun outdated; fi
-    if [ "$AUDIT" = "true" ]; then bun audit 2>/dev/null || npm audit; fi
-    ;;
-  node-pnpm)
-    if [ "$OUTDATED" = "true" ]; then pnpm outdated; fi
-    if [ "$AUDIT" = "true" ]; then pnpm audit; fi
-    ;;
-  node-npm)
-    if [ "$OUTDATED" = "true" ]; then npm outdated; fi
-    if [ "$AUDIT" = "true" ]; then npm audit; fi
-    ;;
-  node-yarn)
-    if [ "$OUTDATED" = "true" ]; then yarn outdated; fi
-    if [ "$AUDIT" = "true" ]; then yarn npm audit; fi
-    ;;
-  python-poetry)
-    if [ "$OUTDATED" = "true" ]; then poetry show --outdated; fi
-    ;;
-  python-uv)
-    if [ "$OUTDATED" = "true" ]; then uv pip list --outdated; fi
-    ;;
-esac
-
-if [ "$LICENSES" = "true" ]; then
-  echo "fledge-deps: --licenses is not yet implemented in v0.1." >&2
-  exit 70
+  OUTPUT="$(run_ecosystem_commands 2>&1)" || true
+  # Escape the output for safe JSON embedding (backslashes, quotes, newlines).
+  ESCAPED="$(printf '%s' "$OUTPUT" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | awk '{ if (NR>1) printf "\\n"; printf "%s", $0 }')"
+  printf '{\n  "ecosystem": "%s",\n  "output": "%s"\n}\n' "$ECO" "$ESCAPED"
+else
+  run_ecosystem_commands
 fi
