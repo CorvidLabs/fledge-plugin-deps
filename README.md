@@ -29,9 +29,23 @@ Auto-detects the project ecosystem from lockfiles in the current directory, then
 ```sh
 fledge deps --outdated
 fledge deps --audit
+fledge deps --outdated --json
 ```
 
 Default action when no flag is set is `--outdated`.
+
+Pass `--json` to wrap the output in a JSON envelope (useful for piping into other tools or CI scripts).
+
+> **Note:** `--licenses` is planned but not yet implemented.
+
+## Requirements
+
+The plugin auto-detects the ecosystem from lockfiles and shells out to the
+corresponding tool. You need the backing tools installed for your ecosystem:
+
+- **Rust:** `cargo-outdated` and/or `cargo-audit` (`cargo install cargo-outdated cargo-audit`)
+- **Node:** `npm`, `pnpm`, `yarn`, or `bun` (whichever matches your lockfile)
+- **Python:** `poetry` or `uv`, plus `pip-audit` for security audits (`pipx install pip-audit`)
 
 ## Why a plugin?
 

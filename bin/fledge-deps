@@ -54,7 +54,7 @@ fi
 
 # Fail fast for unimplemented flags before doing any real work.
 if [ "$LICENSES" = "true" ]; then
-  echo "fledge-deps: --licenses is not yet implemented in v0.1." >&2
+  echo "fledge-deps: --licenses is not yet implemented." >&2
   exit 70
 fi
 
