@@ -1,3 +1,11 @@
 {
-  "approvals": []
+  "approvals": [
+    {
+      "gate": "definition",
+      "actor": "user:0xLeif",
+      "timestamp": 1783951319,
+      "digest": "bdd27285e1beee83975db08c8fc971fe57f3e4f4abe28aba6c7dcac73fd4062e",
+      "note": "Definition approved for the SpecSync 5.0.1 and Trust 1.0.0 rollout after artifact and native-check review."
+    }
+  ]
 }

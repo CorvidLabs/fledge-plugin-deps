@@ -10,5 +10,5 @@ artifact: tasks
 - [x] Install all four integrations.
 - [x] Add ShellCheck and help verification.
 - [x] Add Trust policy and workflow.
-- [ ] Record definition and closing approvals.
-- [ ] Pass hosted checks.
+- [x] Prepare the lifecycle artifacts and policy configuration for definition approval.
+- [x] Run the repository-native verification lane locally.
