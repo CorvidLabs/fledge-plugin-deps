@@ -1,6 +1,6 @@
 ---
 id: CHG-0001-adopt-specsync-5-0-1-and-trust-1-0-0-governance-for-the-deps-fledge-plugin
-state: implementing
+state: accepted
 type: migration
 base_commit: b8b902ceda32936bf43ffb4cdf19fb59340c1dbc
 ---
