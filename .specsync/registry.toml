@@ -1,0 +1,5 @@
+[registry]
+name = "fledge-plugin-deps-trust-wave3"
+
+[specs]
+deps = "specs/deps/deps.spec.md"

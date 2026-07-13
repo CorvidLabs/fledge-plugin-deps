@@ -1,0 +1,8 @@
+# fledge.toml: project task definitions
+[tasks]
+lint = "shellcheck bin/fledge-deps"
+smoke = "bin/fledge-deps --help"
+
+[lanes.verify]
+description = "Lint and smoke-test the dependency-health plugin"
+steps = ["lint", "smoke"]
